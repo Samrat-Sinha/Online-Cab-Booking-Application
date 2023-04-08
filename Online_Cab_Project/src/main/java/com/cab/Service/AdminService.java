@@ -19,4 +19,8 @@ public interface AdminService {
 	public List<TripBooking> getAllTrips(String customerPhoneNumber,String uuid)throws UserException,CurrentUserSessionException;
 	
 	public List<TripBooking> getAllTripsCabWise(String cabType,String uuid)throws UserException,CurrentUserSessionException,TripBookingException;
+	
+    public List<User> viewCustomers(String uuid)throws UserException,CurrentUserSessionException;
+	
+	public User viewCustomer(String customerPhoneNumber,String uuid)throws UserException,CurrentUserSessionException;
 }

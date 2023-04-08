@@ -148,6 +148,52 @@ public class AdminServiceImpl implements AdminService {
 		}
 	}
 	
+	@Override
+	public List<User> viewCustomers(String uuid) throws UserException, CurrentUserSessionException {
+		// TODO Auto-generated method stub
+		Optional<CurrentUserSession> validAdmin = currRepo.findByUuid(uuid);
+		CurrentUserSession curr = validAdmin.get();
+		if(validAdmin.isPresent()) {
+			List<User> alluser = uRepo.findAll();
+			List<User> customers = new ArrayList<>();
+			for(User u : alluser) {
+				String check = u.getRole();
+				check = check.toLowerCase();
+				if(check.equals("customer")) {
+					customers.add(u);
+				}
+			}
+			if(customers.isEmpty()) {
+				throw new UserException("No Customer Present in the Application!!!");
+			}
+			else {
+				return customers;
+			}
+		}
+		else {
+			throw new CurrentUserSessionException("Admin Not Logged In");
+		}
+	}
+
+	@Override
+	public User viewCustomer(String customerPhoneNumber,String uuid) throws UserException, CurrentUserSessionException {
+		// TODO Auto-generated method stub
+		Optional<CurrentUserSession> validAdmin = currRepo.findByUuid(uuid);
+		CurrentUserSession curr = validAdmin.get();
+		if(validAdmin.isPresent()) {
+			Optional<User> opt = uRepo.findByMobileNumber(customerPhoneNumber);
+			if(opt.isEmpty()) {
+				throw new UserException("No Customer Found with the Details Entered!!!");
+			}
+			else {
+				return opt.get();
+			}
+		}
+		else {
+			throw new CurrentUserSessionException("Admin Not Logged In");
+		}	
+	}
+
 	
 
 }

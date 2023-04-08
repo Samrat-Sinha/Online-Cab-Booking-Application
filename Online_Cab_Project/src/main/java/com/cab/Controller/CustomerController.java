@@ -1,19 +1,20 @@
 package com.cab.Controller;
 
-import java.util.List;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cab.Exception.CurrentUserSessionException;
 import com.cab.Exception.UserException;
 import com.cab.Model.User;
 import com.cab.Service.CustomerService;
@@ -31,22 +32,14 @@ public class CustomerController {
 	}
 	
 	@PutMapping("/update")
-	public ResponseEntity<User> customerUpdateHandler(@RequestBody User user) throws UserException{
-		return new ResponseEntity<User>(cService.updateCustomer(user),HttpStatus.OK);
+	public ResponseEntity<User> customerUpdateHandler(@RequestBody User user, @RequestParam String uuid) throws UserException, CurrentUserSessionException{
+		return new ResponseEntity<User>(cService.updateCustomer(user, uuid),HttpStatus.OK);
 	}
 	
-	@DeleteMapping("/delete/{customerPhoneNumber}")
-	public ResponseEntity<User> customerDeletedhandler(@PathVariable("customerPhoneNumber") String customerPhoneNumber) throws UserException{
-		return new ResponseEntity<User>(cService.deleteCustomer(customerPhoneNumber),HttpStatus.OK);
+	@DeleteMapping("/delete")
+	public ResponseEntity<User> customerDeletedhandler(@RequestParam String customerPhoneNumber, @RequestParam String uuid) throws UserException, CurrentUserSessionException{
+		return new ResponseEntity<User>(cService.deleteCustomer(customerPhoneNumber, uuid),HttpStatus.OK);
 	}
 	
-	@GetMapping("/getAllCustomers")
-	public ResponseEntity<List<User>> getAllCustomerHandler() throws UserException{
-		return new ResponseEntity<List<User>>(cService.viewCustomers(),HttpStatus.OK);
-	}
-	
-	@GetMapping("/getCustomer/{customerPhoneNumber}")
-	public ResponseEntity<User> getCustomerhandler(@PathVariable("customerPhoneNumber") String customerPhoneNumber) throws UserException{
-		return new ResponseEntity<User>(cService.viewCustomer(customerPhoneNumber),HttpStatus.OK);
-	}
 }
+

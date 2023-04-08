@@ -62,4 +62,14 @@ public class AdminController {
 		return new ResponseEntity<List<TripBooking>>(aService.getAllTripsCabWise(cabType, uuid),HttpStatus.CREATED);
 	}
 	
+	@GetMapping("/allUser")
+	public ResponseEntity<List<User>> viewAllCustomersHandler(@RequestParam String uuid) throws UserException, CurrentUserSessionException{
+		return new ResponseEntity<List<User>>(aService.viewCustomers(uuid),HttpStatus.OK);
+	}
+	
+	@GetMapping("/viewCustomer")
+	public ResponseEntity<User> viewCustomerHandler(@RequestParam String customerPhoneNumber,@RequestParam String uuid) throws UserException, CurrentUserSessionException{
+		return new ResponseEntity<User>(aService.viewCustomer(customerPhoneNumber, uuid),HttpStatus.OK);
+	}
+	
 }
