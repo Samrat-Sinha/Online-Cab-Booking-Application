@@ -12,4 +12,5 @@ public interface UserRepo extends JpaRepository<User, Integer>{
   
 	public Optional<User> findByMobileNumber(String mobileNumber);
 
+	public Optional<User> findByEmail(String email);
 }
