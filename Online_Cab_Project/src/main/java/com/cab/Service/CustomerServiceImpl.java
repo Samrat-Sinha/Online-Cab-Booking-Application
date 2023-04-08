@@ -23,7 +23,14 @@ public class CustomerServiceImpl implements CustomerService{
 		// TODO Auto-generated method stub
 		Optional<User> opt = uRepo.findByMobileNumber(user.getMobileNumber());
 		if(opt.isEmpty()) {
-			return uRepo.save(user);
+			String role = user.getRole();
+			role = role.toLowerCase();
+	        if(role.equals("customer")) {
+	        	return uRepo.save(user);
+	        }
+	        else {
+	        	throw new UserException("User is not Customer");
+	        }
 		}
 		else {
 			throw new UserException("Please Recheck Customer is Already Registered!!!");

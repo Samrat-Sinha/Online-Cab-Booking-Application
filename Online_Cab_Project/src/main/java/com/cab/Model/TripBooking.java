@@ -32,7 +32,7 @@ public class TripBooking {
 	private float distanceInKm;
 	private float bill;
 	
-	@OneToOne(cascade = CascadeType.ALL,mappedBy = "tripBooking")
+	@ManyToOne(cascade = CascadeType.ALL)
 	@JsonIgnore
 	private User user;
 	
