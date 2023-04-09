@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,10 +26,16 @@ public class TripBooking {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer tripBookingId;
+	
 	private String fromLocation;
 	private String toLocation;
+	
 	private LocalDateTime fromDateTime;
 	private LocalDateTime toDateTime;
+	
+	@Enumerated(EnumType.STRING)
+	private CarType carType;
+	
 	private boolean status;
 	private float distanceInKm;
 	private float bill;

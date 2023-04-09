@@ -6,4 +6,7 @@ public class TripBookingException extends Exception{
 		// TODO Auto-generated constructor stub
 		super(msg);
 	}
+	
+	
 }
+

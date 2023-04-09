@@ -25,11 +25,13 @@ public class Driver {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer driverId;
+	private String driverFirstName;
+	private String driverLastName;
 	private String licenseNo;
 	private float rating;
+	private String currentLocation;
 	
 	@OneToOne(cascade = CascadeType.ALL)
-	@JsonIgnore
 	private Cab cab;
 	
 	@OneToMany(cascade = CascadeType.ALL,mappedBy = "driver")
