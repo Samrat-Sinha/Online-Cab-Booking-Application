@@ -13,6 +13,7 @@ import com.cab.Exception.CurrentUserSessionException;
 import com.cab.Exception.TripBookingException;
 import com.cab.Exception.UserException;
 import com.cab.Model.TripBooking;
+import com.cab.Model.TripBookingDTO;
 import com.cab.Service.TripBookingService;
 
 @RestController
@@ -23,8 +24,8 @@ public class TripBookingController {
 	private TripBookingService tbService;
 	
 	@PostMapping("/addnewTrip")
-	public ResponseEntity<TripBooking> insertTripBookingHandler(@RequestBody TripBooking tripBooking, @RequestParam String uuid) throws TripBookingException, CurrentUserSessionException, UserException{
-		return new ResponseEntity<TripBooking>(tbService.insertTripBooking(tripBooking, uuid),HttpStatus.CREATED);
+	public ResponseEntity<TripBookingDTO> insertTripBookingHandler(@RequestBody TripBooking tripBooking, @RequestParam String uuid) throws TripBookingException, CurrentUserSessionException, UserException{
+		return new ResponseEntity<TripBookingDTO>(tbService.insertTripBooking(tripBooking, uuid),HttpStatus.CREATED);
 	}
 	
 

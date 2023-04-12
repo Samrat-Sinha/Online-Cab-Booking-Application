@@ -3,6 +3,7 @@ package com.cab.Model;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -30,15 +31,13 @@ public class TripBooking {
 	private String fromLocation;
 	private String toLocation;
 	
-	private LocalDateTime fromDateTime;
-	private LocalDateTime toDateTime;
+	private String fromDate;
+	private String toDate;
 	
 	@Enumerated(EnumType.STRING)
 	private CarType carType;
-	
-	private boolean status;
+
 	private float distanceInKm;
-	private float bill;
 	
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JsonIgnore

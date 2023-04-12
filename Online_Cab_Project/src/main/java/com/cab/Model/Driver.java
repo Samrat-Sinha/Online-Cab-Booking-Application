@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,6 +32,9 @@ public class Driver {
 	private String licenseNo;
 	private float rating;
 	private String currentLocation;
+	
+	@Enumerated(EnumType.STRING)
+	private DriverAvalability avalable; 
 	
 	@OneToOne(cascade = CascadeType.ALL)
 	private Cab cab;
