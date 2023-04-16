@@ -23,8 +23,7 @@ public class Cab {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer cabId;
 	
-	@Enumerated(EnumType.STRING)
-	private CarType carType;
+	private String carType;
 	
 	private String carName;
 	private String carNumber;

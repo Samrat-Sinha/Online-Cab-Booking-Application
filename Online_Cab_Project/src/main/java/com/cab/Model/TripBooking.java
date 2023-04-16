@@ -31,11 +31,10 @@ public class TripBooking {
 	private String fromLocation;
 	private String toLocation;
 	
-	private String fromDate;
-	private String toDate;
+	private LocalDateTime fromDateTime;
+	private LocalDateTime toDateTime;
 	
-	@Enumerated(EnumType.STRING)
-	private CarType carType;
+	private String carType;
 
 	private float distanceInKm;
 	

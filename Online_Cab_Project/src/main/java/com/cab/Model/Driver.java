@@ -33,8 +33,8 @@ public class Driver {
 	private float rating;
 	private String currentLocation;
 	
-	@Enumerated(EnumType.STRING)
-	private DriverAvalability avalable; 
+	
+	private boolean onAnotherRide; 
 	
 	@OneToOne(cascade = CascadeType.ALL)
 	private Cab cab;

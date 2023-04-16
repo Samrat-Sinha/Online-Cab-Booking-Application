@@ -24,13 +24,16 @@ public class TripBookingDTO {
 	private String fromDate;
 	private String toDate;
 	
+	private String fromTime;
+	private String toTime;
+	
 	private String driverFirstName;
 	private String driverLastName;
 	private String licenseNo;
 	
 	
 	@Enumerated(EnumType.STRING)
-	private CarType carType;
+	private String carType;
 	private String carName;
 	private String carNumber;
 	private float rating;
