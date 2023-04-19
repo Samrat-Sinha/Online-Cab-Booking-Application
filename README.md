@@ -79,7 +79,8 @@ http://localhost:1995/swagger-ui/index.html#/
 ### E-R Diagram Of Online Cab Booking Application
 ---
 
-<img src="https://user-images.githubusercontent.com/101389007/232260796-0995ffac-bd60-4af1-9693-be5d3730920c.png">
+<img src="https://user-images.githubusercontent.com/101389007/233219411-57241aef-7c4a-40d7-8187-311463b7abe4.png">
+
 
 ---
 
