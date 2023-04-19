@@ -1,33 +1,34 @@
 package com.cab.Model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Cab {
+public class Customer extends User{
 
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer cabId;
-	private String carType;
-	private String carName;
-	private String carNumber;
-	private float perKmRate;
-	private String CurrLocation;
-	private String cabCurrStatus;
+	private Integer customerId;
 	
-	@OneToOne
+	@OneToMany(cascade = CascadeType.PERSIST)
 	@JsonIgnore
-	private Driver driver;
+	private List<TripBooking> tripBooking;
 }

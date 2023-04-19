@@ -2,18 +2,20 @@ package com.cab.Service;
 
 import java.util.List;
 
+import com.cab.Exception.CurrentUserSessionException;
 import com.cab.Exception.DriverException;
 import com.cab.Model.Driver;
 
 public interface DriverService {
 
-	public Driver insertDriver(Driver driver)throws DriverException;
+    Driver insertDriver(Driver driver)throws DriverException;
 	
-	public Driver updateDriver(Driver driver)throws DriverException;
+	Driver updateDriver(Driver driver,String uuid)throws DriverException,CurrentUserSessionException;
 	
-	public Driver deleteDriver(String LicenseNo)throws DriverException;
+	Driver deleteDriver(Integer driverId, String uuid)throws DriverException,CurrentUserSessionException;
 	
-	public List<Driver> viewBestDrivers()throws DriverException;
+	List<Driver> viewBestDriver(String uuid)throws DriverException,CurrentUserSessionException;
 	
-	public Driver viewDriver(String LicenseNo)throws DriverException;
+	Driver viewDriver(Integer driverId,String uuid)throws DriverException,CurrentUserSessionException;
+	
 }

@@ -7,8 +7,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,31 +14,31 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Driver {
-	
+public class Driver extends User{
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Integer driverId;
-	private String driverFirstName;
-	private String driverLastName;
-	private String licenseNo;
+	private String licenceNo;
 	private float rating;
-	private String currentLocation;
+	private String currLocation;
+	private String currDriverStatus;
 	
-	
-	private boolean onAnotherRide; 
-	
-	@OneToOne(cascade = CascadeType.ALL)
-	private Cab cab;
-	
-	@OneToMany(cascade = CascadeType.ALL,mappedBy = "driver")
+	@OneToMany(cascade = CascadeType.PERSIST,mappedBy = "driver")
 	@JsonIgnore
-	List<TripBooking> tripBooking = new ArrayList<>(); 
+	List<TripBooking> trips = new ArrayList<>();
+	
+	@OneToOne
+	@JsonIgnore
+	private Cab cab;
 	
 }

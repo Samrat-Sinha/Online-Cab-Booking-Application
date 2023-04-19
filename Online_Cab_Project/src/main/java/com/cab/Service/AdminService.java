@@ -1,26 +1,30 @@
 package com.cab.Service;
 
+
+
 import java.util.List;
 
+import com.cab.Exception.AdminException;
 import com.cab.Exception.CurrentUserSessionException;
+import com.cab.Exception.CustomerException;
 import com.cab.Exception.TripBookingException;
-import com.cab.Exception.UserException;
+import com.cab.Model.Admin;
 import com.cab.Model.TripBooking;
-import com.cab.Model.User;
+
 
 public interface AdminService {
 
-	public User insertAdmin(User user)throws UserException;
+	Admin insertAdmin(Admin admin) throws AdminException;
 	
-	public User updateAdmin(User user, String uuid)throws UserException,CurrentUserSessionException;
+    Admin updateAdmin(Admin admin,String uuid) throws AdminException,CurrentUserSessionException;
 	
-	public User deleteAdmin(String uuid)throws UserException,CurrentUserSessionException;
-	
-	public List<TripBooking> getAllTrips(String customerPhoneNumber,String uuid)throws UserException,CurrentUserSessionException;
-	
-	public List<TripBooking> getAllTripsCabWise(String cabType,String uuid)throws UserException,CurrentUserSessionException,TripBookingException;
-	
-    public List<User> viewCustomers(String uuid)throws UserException,CurrentUserSessionException;
-	
-	public User viewCustomer(String customerPhoneNumber,String uuid)throws UserException,CurrentUserSessionException;
+    Admin deleteAdmin(Integer adminId,String uuid) throws AdminException,CurrentUserSessionException;
+    
+    List<TripBooking> getAllTrips(String uuid)throws AdminException, TripBookingException, CurrentUserSessionException;
+	  
+    List<TripBooking> getTripsCabwise(String carType, String uuid)throws TripBookingException, CurrentUserSessionException;
+    
+    List<TripBooking> getTripsCustomerwise(Integer customerId, String uuid)throws TripBookingException,CustomerException, CurrentUserSessionException;
+    
+    List<TripBooking> getAllTripsForDays(Integer customerId, String fromDateTime, String toDateTime, String uuid)throws TripBookingException,CustomerException, CurrentUserSessionException;
 }

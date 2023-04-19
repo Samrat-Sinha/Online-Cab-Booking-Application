@@ -1,7 +1,5 @@
 package com.cab.Controller;
 
-
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,60 +15,54 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cab.Exception.AdminException;
 import com.cab.Exception.CurrentUserSessionException;
+import com.cab.Exception.CustomerException;
 import com.cab.Exception.TripBookingException;
-import com.cab.Exception.UserException;
+import com.cab.Model.Admin;
 import com.cab.Model.TripBooking;
-import com.cab.Model.User;
 import com.cab.Service.AdminService;
 
-
-
 @RestController
-@RequestMapping("/OnlineCabBookingApplication/Admin")
+@RequestMapping("/admin")
 public class AdminController {
 
 	@Autowired
-	private AdminService aService;
+	private AdminService adminService;
 	
-	@PostMapping("/adminRegister")
-	public ResponseEntity<User> insertAdminHandler(@RequestBody User user) throws UserException{
-		
-		return new ResponseEntity<User>(aService.insertAdmin(user),HttpStatus.CREATED);
+	
+	@PostMapping("/register")
+	public ResponseEntity<Admin> registerAdmin(@RequestBody Admin admin) throws AdminException{
+		return new ResponseEntity<Admin>(adminService.insertAdmin(admin),HttpStatus.CREATED);
 	}
 	
-	@PutMapping("/adminUpdate")
-	public ResponseEntity<User> updateAdminHandler(@RequestParam String uuid, @RequestBody User user) throws UserException, CurrentUserSessionException{
-		
-		return new ResponseEntity<User>(aService.updateAdmin(user, uuid),HttpStatus.OK);
+	@PutMapping("/Update")
+	public ResponseEntity<Admin> updateAdminHandler(@RequestBody Admin admin,@RequestParam String uuid) throws AdminException, CurrentUserSessionException{
+		return new ResponseEntity<Admin>(adminService.updateAdmin(admin, uuid),HttpStatus.OK);
 	}
 	
-	@DeleteMapping("delete")
-	public ResponseEntity<User> deleteAdminHandler(@RequestParam String uuid) throws UserException, CurrentUserSessionException{
-		
-		return new ResponseEntity<User>(aService.deleteAdmin(uuid),HttpStatus.CREATED);
+	@DeleteMapping("/delete")
+	public ResponseEntity<Admin> deleteAdmin(@RequestParam("adminId") Integer adminId,@RequestParam("uuid")  String uuid) throws AdminException, CurrentUserSessionException{
+		return new ResponseEntity<Admin>(adminService.deleteAdmin(adminId, uuid),HttpStatus.OK);
 	}
 	
-	@GetMapping("AllTripsByCustomer")
-	public ResponseEntity<List<TripBooking>> getAllTripsByAdminHandler(@RequestParam String customerPhoneNumber,@RequestParam String uuid) throws UserException, CurrentUserSessionException{
-		
-		return new ResponseEntity<List<TripBooking>>(aService.getAllTrips(customerPhoneNumber, uuid),HttpStatus.CREATED);
+	@GetMapping("/getAllTrips")
+	public ResponseEntity<List<TripBooking>> getAllTrips(@RequestParam("uuid")  String uuid) throws AdminException, TripBookingException, CurrentUserSessionException{
+		return new ResponseEntity<List<TripBooking>>(adminService.getAllTrips(uuid),HttpStatus.OK);
 	}
 	
-	@GetMapping("AllTripsCabWise")
-	public ResponseEntity<List<TripBooking>> getAllTripsCabWiseHandler(@RequestParam String cabType,@RequestParam String uuid) throws UserException, CurrentUserSessionException, TripBookingException{
-		
-		return new ResponseEntity<List<TripBooking>>(aService.getAllTripsCabWise(cabType, uuid),HttpStatus.CREATED);
+	@GetMapping("/getTripsCabwise/{carType}")
+	public ResponseEntity<List<TripBooking>> getTripsCabwise(@PathVariable("carType") String carType,@RequestParam("uuid")  String uuid) throws TripBookingException, CurrentUserSessionException{
+		return new ResponseEntity<List<TripBooking>>(adminService.getTripsCabwise(carType, uuid),HttpStatus.OK);
 	}
 	
-	@GetMapping("/allUser")
-	public ResponseEntity<List<User>> viewAllCustomersHandler(@RequestParam String uuid) throws UserException, CurrentUserSessionException{
-		return new ResponseEntity<List<User>>(aService.viewCustomers(uuid),HttpStatus.OK);
+	@GetMapping("/getTripsCustomerwise")
+	public ResponseEntity<List<TripBooking>> getTripsCustomerwise(@RequestParam("customerId") Integer customerId,@RequestParam("uuid")  String uuid) throws TripBookingException, CustomerException, CurrentUserSessionException{
+		return new ResponseEntity<List<TripBooking>>(adminService.getTripsCustomerwise(customerId, uuid),HttpStatus.OK);
 	}
 	
-	@GetMapping("/viewCustomer")
-	public ResponseEntity<User> viewCustomerHandler(@RequestParam String customerPhoneNumber,@RequestParam String uuid) throws UserException, CurrentUserSessionException{
-		return new ResponseEntity<User>(aService.viewCustomer(customerPhoneNumber, uuid),HttpStatus.OK);
+	@GetMapping("/getAllTripsForDays/{fromDateTime}/{toDateTime}")
+	public ResponseEntity<List<TripBooking>> getAllTripsForDays(@RequestParam("customerId") Integer customerId,@PathVariable("fromDateTime") String fromDateTime,@PathVariable("toDateTime") String toDateTime ,@RequestParam("uuid")  String uuid) throws TripBookingException, CustomerException, CurrentUserSessionException{
+		return new ResponseEntity<List<TripBooking>>(adminService.getAllTripsForDays(customerId, fromDateTime, toDateTime, uuid),HttpStatus.OK);
 	}
-	
-}
+}  

@@ -2,23 +2,22 @@ package com.cab.Service;
 
 import java.util.List;
 
+import com.cab.Exception.CabException;
 import com.cab.Exception.CurrentUserSessionException;
 import com.cab.Exception.TripBookingException;
-import com.cab.Exception.UserException;
+import com.cab.Model.Cab;
 import com.cab.Model.TripBooking;
 import com.cab.Model.TripBookingDTO;
 
 public interface TripBookingService {
 
-	public TripBookingDTO insertTripBooking(TripBooking tripBooking,String uuid)throws TripBookingException,CurrentUserSessionException,UserException;
+	List<Cab> searchByLocation(String pickUpLocation,String uuid)throws TripBookingException,CurrentUserSessionException;
 	
-    public TripBooking updateTripBooking(TripBooking tripBooking,String uuid)throws TripBookingException,CurrentUserSessionException;
+	TripBooking BookRequest(Integer cabId,TripBooking tripBooking,String uuid) throws TripBookingException,CabException,CurrentUserSessionException;
 	
-    public TripBooking deleteTripBooking(Integer tripBookingId,String uuid)throws TripBookingException,CurrentUserSessionException;
+	TripBooking AssignDriverByAdmin(Integer TripBookingId,String uuid)throws TripBookingException,CabException,CurrentUserSessionException;
 	
-    public List<TripBooking> viewAllTripsCustomer(String uuid)throws TripBookingException,CurrentUserSessionException;
-    
-    public String calculateBill(String uuid)throws TripBookingException,CurrentUserSessionException;
-    
-    
+	TripBookingDTO viewBookingById(Integer TripBookingId,String uuid )throws TripBookingException,CabException,CurrentUserSessionException;
+	
+	String MarkTripAsCompleted(Integer TripBookingId,String uuid)throws TripBookingException,CurrentUserSessionException;;
 }

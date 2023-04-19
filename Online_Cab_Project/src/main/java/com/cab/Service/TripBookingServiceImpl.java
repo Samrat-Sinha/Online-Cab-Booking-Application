@@ -2,261 +2,284 @@ package com.cab.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.EnumSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cab.Exception.CabException;
 import com.cab.Exception.CurrentUserSessionException;
 import com.cab.Exception.TripBookingException;
-import com.cab.Exception.UserException;
 import com.cab.Model.Cab;
 import com.cab.Model.CurrentUserSession;
+import com.cab.Model.Customer;
 import com.cab.Model.Driver;
 import com.cab.Model.TripBooking;
 import com.cab.Model.TripBookingDTO;
-import com.cab.Model.User;
 import com.cab.Repositary.CabRepo;
 import com.cab.Repositary.CurrentUserSessionRepo;
+import com.cab.Repositary.CustomerRepo;
 import com.cab.Repositary.DriverRepo;
 import com.cab.Repositary.TripBookingRepo;
-import com.cab.Repositary.UserRepo;
 
 @Service
 public class TripBookingServiceImpl implements TripBookingService{
 
+	
 	@Autowired
-	private UserRepo uRepo;
+	private TripBookingRepo tripBookingRepo;
+	
+	@Autowired
+	private CustomerRepo customerRepo;
+	
+	@Autowired
+	private CabRepo cabRepo;
 	
 	@Autowired
 	private CurrentUserSessionRepo currRepo;
 	
 	@Autowired
-	private TripBookingRepo tRepo;
+	private DriverRepo driverRepo;
 	
-	@Autowired
-	private DriverRepo dRepo;
 	
-	@Autowired
-	private CabRepo cabRepo;
-
 	@Override
-	public TripBookingDTO insertTripBooking(TripBooking tripBooking, String uuid)
-			throws TripBookingException, CurrentUserSessionException, UserException {
-		// TODO Auto-generated method stub
-		Optional<CurrentUserSession> validLog = currRepo.findByUuid(uuid);
-		CurrentUserSession curr = validLog.get();
-		if(validLog.isPresent()) {
-			Optional<User> opt = uRepo.findById(curr.getCurrUserId());
-			User customer  = opt.get();
-			List<TripBooking> allTrip = customer.getTripBooking();
-			List<TripBooking> bookedTrips = tRepo.findByFromDateTimeBetweenAndUser(tripBooking.getFromDateTime(),tripBooking.getToDateTime(),customer);
-			if(!bookedTrips.isEmpty()) {
-			    throw new TripBookingException("You have already booked a trip for this time slot.");
-			}
-			else {
-				
-				Driver driver = dRepo.findFirstByCabCarTypeAndCurrentLocationAndOnAnotherRide(tripBooking.getCarType(),
-	                    tripBooking.getFromLocation(), false)
-	                    .orElseThrow(() -> new TripBookingException("No available drivers found"));
-
-				driver.setOnAnotherRide(true);
-				tripBooking.setDriver(driver);
-				allTrip.add(tripBooking);
-	            customer.setTripBooking(allTrip);
-	            TripBooking tsave = tRepo.save(tripBooking);
-	            tsave.setUser(customer);
-	            tRepo.save(tsave);
-				TripBookingDTO dto = new TripBookingDTO();
-				dto.setFirstName(customer.getFirstName());
-				dto.setLastName(customer.getLastName());
-				dto.setFromLocation(tsave.getFromLocation());
-				dto.setToLocation(tsave.getToLocation());
-				dto.setTripBookingId(tsave.getTripBookingId());
-				
-				LocalDateTime fromDT = tsave.getFromDateTime();
-				LocalDateTime toDT = tsave.getToDateTime();
-				
-				DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-				String fromDate = fromDT.format(dateFormatter);
-				String toDate = toDT.format(dateFormatter);
-				
-				DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-				
-				String fromTime = fromDT.format(timeFormatter);
-				String toTime = toDT.format(timeFormatter);
-				
-				dto.setFromDate(fromDate);
-				dto.setToDate(toDate);
-				
-				dto.setFromTime(fromTime);
-				dto.setToTime(toTime);
-				
-
-				
-				
-				
-				dto.setDriverFirstName(driver.getDriverFirstName());
-				dto.setDriverLastName(driver.getDriverLastName());
-				dto.setLicenseNo(driver.getLicenseNo());
-				dto.setCarType(driver.getCab().getCarType());
-				dto.setCarName(driver.getCab().getCarName());
-				dto.setCarNumber(driver.getCab().getCarNumber());
-				dto.setRating(driver.getRating());
-				float ans = driver.getCab().getPerKmRate() * tsave.getDistanceInKm();
-				dto.setBill(ans);
-				return dto;
-			}
-		}
-		else {
-			throw new CurrentUserSessionException("User Not Logged In");
-		}
-	}
-
-	@Override
-	public TripBooking updateTripBooking(TripBooking tripBooking,String uuid)
+	public List<Cab> searchByLocation(String pickUpLocation, String uuid)
 			throws TripBookingException, CurrentUserSessionException {
-		// TODO Auto-generated method stub
-		Optional<CurrentUserSession> validLog = currRepo.findByUuid(uuid);
-		CurrentUserSession curr = validLog.get();
-		if(validLog.isPresent()) {
-			Optional<User> opt = uRepo.findById(curr.getCurrUserId());
-			User customer  = opt.get();
-			List<TripBooking> allTrips = customer.getTripBooking();
-			TripBooking ans = new TripBooking();
-			boolean change = false;
-			for(TripBooking tb : allTrips) {
-				if(tb.getTripBookingId()== tripBooking.getTripBookingId()) {
-					ans = tb;
-					change = true;
-				}
-			}
-			if(allTrips.isEmpty()) {
-				throw new TripBookingException("No Trip is booked Till now");
-			}
-			else if(change==false) {
-		    	throw new TripBookingException("No Trip is deleted so maybe the tripId is wrong");
-		    }
-			else {
-				allTrips.remove(ans);
-				ans.setCarType(tripBooking.getCarType());
-				ans.setDistanceInKm(tripBooking.getDistanceInKm());
-				ans.setFromDateTime(tripBooking.getFromDateTime());
-				ans.setFromLocation(tripBooking.getFromLocation());
-				ans.setToDateTime(tripBooking.getToDateTime());
-				ans.setToLocation(tripBooking.getToLocation());
-				Driver olddriver = ans.getDriver();
-				olddriver.setOnAnotherRide(false);
-				dRepo.save(olddriver);
-				Driver driver = dRepo.findFirstByCabCarTypeAndCurrentLocationAndOnAnotherRide(tripBooking.getCarType(),
-	                    tripBooking.getFromLocation(), false)
-	                    .orElseThrow(() -> new TripBookingException("No available drivers found"));
-
-				driver.setOnAnotherRide(true);
-				tripBooking.setDriver(driver);
-				
-				allTrips.add(ans);
-			    customer.setTripBooking(allTrips);
-			    tRepo.save(ans);
-			    uRepo.save(customer);
-				return ans;
-				
-			}
-		}
-		else {
-			throw new CurrentUserSessionException("User Not Logged In");
-		}
-	}
-
-	@Override
-	public TripBooking deleteTripBooking(Integer tripBookingId,String uuid)
-			throws TripBookingException, CurrentUserSessionException{
-		// TODO Auto-generated method stub
-		Optional<CurrentUserSession> validLog = currRepo.findByUuid(uuid);
-		CurrentUserSession curr = validLog.get();
-		if(validLog.isPresent()) {
-			Optional<User> opt = uRepo.findById(curr.getCurrUserId());
-			User customer  = opt.get();
-			List<TripBooking> allTripBookings = customer.getTripBooking();
-		    TripBooking ans = new TripBooking();
-		    boolean change = false;
-			for(TripBooking tb : allTripBookings) {
-		    	if(tb.getTripBookingId() == tripBookingId) {
-		    		ans = tb;
-		    		change = true;
+		Optional<CurrentUserSession> validUser = currRepo.findByUuid(uuid);
+		if(validUser.isPresent()) {
+			List<Cab> allCab = cabRepo.findAll();
+		    List<Cab> availableCab = new ArrayList<>();
+		    for(Cab cab : allCab) {
+		    	if(cab.getCabCurrStatus().equalsIgnoreCase("Available") && cab.getCurrLocation().equalsIgnoreCase(pickUpLocation)) {
+		    		availableCab.add(cab);
 		    	}
 		    }
-			allTripBookings.remove(ans);
-			customer.setTripBooking(allTripBookings);
-			uRepo.save(customer);
-			
-			
-		    if(allTripBookings.isEmpty()) {
-		    	throw new TripBookingException("No Trip is booked Till now");
-		    }
-			else if(change==false) {
-		    	throw new TripBookingException("No Trip is deleted so maybe the tripId is wrong");
+		    if(availableCab.isEmpty()) {
+		    	throw new TripBookingException("No Cab Available in this Location");
 		    }
 		    else {
-		    	return ans; 
+		    	return availableCab;
 		    }
 		}
 		else {
-			throw new CurrentUserSessionException("User Not Logged In");
+			throw new CurrentUserSessionException("User Not Login");
 		}
 	}
 
+
 	@Override
-	public List<TripBooking> viewAllTripsCustomer(String uuid)
+	public TripBooking BookRequest(Integer cabId, TripBooking tripBooking, String uuid)
+			throws TripBookingException ,CabException , CurrentUserSessionException{
+		Optional<CurrentUserSession> validUser = currRepo.findByUuid(uuid);
+		if(validUser.isPresent()) {
+			CurrentUserSession currUser = validUser.get();
+			Optional<Customer> cust = customerRepo.findById(currUser.getCurrUserId());
+			Customer customer = cust.get();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+			LocalDateTime fromDT = LocalDateTime.parse(tripBooking.getFromDateTime(), formatter);
+            LocalDateTime toDT = LocalDateTime.parse(tripBooking.getToDateTime(), formatter);
+			List<TripBooking> allTripByCustomer = customer.getTripBooking();
+			if(isTripOverlap(tripBooking, allTripByCustomer)==true) {
+				throw new TripBookingException("You have already booked an another Trip in the same Time");
+			}
+			else {
+				Optional<Cab> addCab = cabRepo.findById(cabId);
+				if(addCab.isPresent()) {
+					Cab newCab = addCab.get();
+					if(newCab.getCabCurrStatus().equalsIgnoreCase("Available") &&
+							newCab.getCurrLocation().equalsIgnoreCase(tripBooking.getPickupLocation())) {
+						newCab.setCabCurrStatus("Pending");
+						tripBooking.setCab(newCab);
+						tripBooking.setCustomer(customer);
+						tripBooking.setCurrStatus("Pending");
+						allTripByCustomer.add(tripBooking);
+						customerRepo.save(customer);
+						return tripBookingRepo.save(tripBooking);
+						
+					}
+					else {
+						throw new CabException("This Cab is not available currently for location or avability purpose");
+					}
+				}
+				else {
+					throw new CabException("No Cab Present with the given Credentials");
+				}
+			}
+		}
+		else {
+			throw new CurrentUserSessionException("User is Not Login");
+		}
+	}
+	
+	
+
+	public List<Driver> getAvailableDrivers(String pickUpLocation) {
+	    return driverRepo.findByCurrLocationAndCurrDriverStatus(pickUpLocation, "available");
+	}
+
+	
+	
+	public boolean isTripOverlap(TripBooking newTripBooking, List<TripBooking> existingTrips) {
+	    if (newTripBooking.getFromDateTime() == null || newTripBooking.getToDateTime() == null) {
+	        return false; 
+	    }
+	    
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+	    LocalDateTime newTripFromDT = LocalDateTime.parse(newTripBooking.getFromDateTime(), formatter);
+	    LocalDateTime newTripToDT = LocalDateTime.parse(newTripBooking.getToDateTime(), formatter);
+	    for (TripBooking existingTripBooking : existingTrips) {
+	        if (existingTripBooking.getFromDateTime() == null || existingTripBooking.getToDateTime() == null) {
+	            continue;
+	        }
+	        LocalDateTime existingTripFromDT = LocalDateTime.parse(existingTripBooking.getFromDateTime(), formatter);
+	        LocalDateTime existingTripToDT = LocalDateTime.parse(existingTripBooking.getToDateTime(), formatter);
+	        if (newTripFromDT.isBefore(existingTripToDT) && newTripToDT.isAfter(existingTripFromDT)) {
+	            return true;
+	        }
+	    }    
+	    return false;
+	}
+
+
+
+	@Override
+	public TripBooking AssignDriverByAdmin(Integer TripBookingId, String uuid)
+			throws TripBookingException, CabException, CurrentUserSessionException {
+		Optional<CurrentUserSession> validUser = currRepo.findByUuidAndRole(uuid);
+		if(validUser.isPresent()) {
+			Optional<TripBooking> optionalTrip = tripBookingRepo.findById(TripBookingId);
+			if(optionalTrip.isPresent()) {
+				TripBooking trip = optionalTrip.get();
+			    Customer customer = trip.getCustomer();
+			    List<TripBooking> allTrips = customer.getTripBooking();
+			    List<Driver> allDrivers = driverRepo.findByCurrLocationAndCurrDriverStatus(trip.getPickupLocation(), "available");
+			    if(allDrivers.isEmpty()) {
+			    	trip.setCurrStatus("cancelled");
+			    	TripBooking canceltrip =  tripBookingRepo.save(trip);
+			    	for(TripBooking tb : allTrips) {
+			    		if(tb.getTripBookingId()==trip.getTripBookingId()) {
+			    			tb.setCurrStatus("cancelled");
+			    		}
+			    	}
+			    	customer.setTripBooking(allTrips);
+			    	 throw new TripBookingException("No driver is available for this trip.");
+			    }
+			    else {
+			    	Driver assignDriver = allDrivers.get(0); 
+				    assignDriver.setCurrDriverStatus("Booked");
+				    assignDriver.setCab(trip.getCab());
+                    
+				    trip.getCab().setDriver(assignDriver);
+				    trip.getCab().setCabCurrStatus("Booked");
+				    cabRepo.save(trip.getCab());
+				    
+				    
+				    List<TripBooking> allTripByDrv = assignDriver.getTrips();
+				    allTripByDrv.add(trip);
+				    assignDriver.setTrips(allTripByDrv);
+
+				    trip.setCurrStatus("confirmed");
+				    trip.setDriver(assignDriver);
+
+				    List<TripBooking> allTrip = customer.getTripBooking();
+				    allTrip.add(trip);
+
+				    tripBookingRepo.save(trip);
+				    customerRepo.save(customer);
+				    return trip;
+			    }
+			}
+			else {
+				throw new TripBookingException("No trip is booked with provided tripBookingId.");
+			}
+		}
+		else {
+			throw new CurrentUserSessionException("User is not logged in or is not an admin.");
+		}
+	}
+
+
+	@Override
+	public TripBookingDTO viewBookingById(Integer TripBookingId, String uuid)
+			throws TripBookingException, CabException, CurrentUserSessionException {
+		Optional<CurrentUserSession> validUser = currRepo.findByUuid(uuid);
+		if(validUser.isPresent()) {
+			Optional<TripBooking> tp = tripBookingRepo.findById(TripBookingId);
+			if(tp.isPresent()) {
+				TripBooking trip = tp.get();
+				TripBookingDTO showTrip = new TripBookingDTO();
+				showTrip.setTripBookingId(TripBookingId);
+				showTrip.setPickupLocation(trip.getPickupLocation());
+				showTrip.setFromDateTime(trip.getFromDateTime());
+				showTrip.setDropLocation(trip.getDropLocation());
+				showTrip.setToDateTime(trip.getToDateTime());
+				showTrip.setDistanceInKm(trip.getDistanceInKm());
+				showTrip.setDriverName(trip.getDriver().getUserName());
+				showTrip.setLicenceNo(trip.getDriver().getLicenceNo());
+				showTrip.setRating(trip.getDriver().getRating());
+				showTrip.setCarType(trip.getCab().getCarType());
+				showTrip.setCarName(trip.getCab().getCarName());
+				showTrip.setCarNumber(trip.getCab().getCarNumber());
+				showTrip.setPerKmRate(trip.getCab().getPerKmRate());
+				showTrip.setFare(trip.getCab().getPerKmRate() * trip.getDistanceInKm());
+				showTrip.setTripStatus(trip.getCurrStatus());
+				return showTrip;
+			}
+			else {
+				throw new TripBookingException("No trip is booked with provided tripBookingId.");
+			}
+		}
+		else {
+			throw new CurrentUserSessionException("User is not logged in");
+		}
+	    
+	}
+
+
+	@Override
+	public String MarkTripAsCompleted(Integer TripBookingId, String uuid)
 			throws TripBookingException, CurrentUserSessionException {
-		// TODO Auto-generated method stub
-		Optional<CurrentUserSession> validLog = currRepo.findByUuid(uuid);
-		CurrentUserSession curr = validLog.get();
-		if(validLog.isPresent()) {
-			Optional<User> opt = uRepo.findById(curr.getCurrUserId());
-			User customer  = opt.get();
-			List<TripBooking> allTripBookings = customer.getTripBooking();
-		    if(allTripBookings.isEmpty()) {
-		    	throw new TripBookingException("No Trip is Booked By the Customer");
-		    }
-		    else {
-		    	return allTripBookings;
-		    }
+		Optional<CurrentUserSession> validUser = currRepo.findByUuid(uuid);
+		if(validUser.isPresent()) {
+			Optional<TripBooking> tp = tripBookingRepo.findById(TripBookingId);
+			if(tp.isPresent()) {
+				TripBooking trip = tp.get();
+				trip.setCurrStatus("Completed");
+				tripBookingRepo.save(trip);
+				Customer cust = trip.getCustomer();
+				List<TripBooking> allTrip = cust.getTripBooking();
+				for(TripBooking tb : allTrip) {
+					if(tb.getTripBookingId() == trip.getTripBookingId()) {
+						tb.setCurrStatus("completed");
+					}
+				}
+				customerRepo.save(cust);
+				trip.getCab().setCabCurrStatus("AVAILABLE");
+				cabRepo.save(trip.getCab());
+				trip.getDriver().setCurrDriverStatus("Available");
+				trip.getDriver().setCab(null);
+			    trip.getCab().setDriver(null);
+				driverRepo.save(trip.getDriver());
+				return "Thank you your Trip has been Completed";
+			}
+			else {
+				throw new TripBookingException("No trip is booked with provided tripBookingId.");
+			}
 		}
 		else {
-			throw new CurrentUserSessionException("User Not Logged In");
+			throw new CurrentUserSessionException("User is not logged in");
 		}
 	}
 
-	@Override
-	public String calculateBill(String uuid) throws TripBookingException, CurrentUserSessionException{
-		// TODO Auto-generated method stub
-		Optional<CurrentUserSession> validLog = currRepo.findByUuid(uuid);
-		CurrentUserSession curr = validLog.get();
-		if(validLog.isPresent()) {
-			Optional<User> opt = uRepo.findById(curr.getCurrUserId());
-			User customer  = opt.get();
-		    float totalBill = 0;
-		    List<TripBooking> allTripBookings = customer.getTripBooking();
-		    for(TripBooking tb : allTripBookings) {
-		    	totalBill += tb.getDistanceInKm() * tb.getDriver().getCab().getPerKmRate();
-		    }
-		    if(totalBill==0) {
-		    	throw new TripBookingException("No Trip is Booked By the Customer");
-		    }
-		    else {
-		    	return "The Total Bill by the Customer " + customer.getFirstName() + " " + customer.getLastName() + " is Rs " + totalBill;
-		    }
-		}
-		else {
-			throw new CurrentUserSessionException("User Not Logged In");
-		}
-	}
 
 	
-	
+
 	
 
 }
+
+
+
+
