@@ -59,14 +59,12 @@ http://localhost:1995/swagger-ui/index.html#/
 ```
     {
         "email": "samrat@gmail.com",
-        "password": "sam123",
-        "role": "Customer"
+        "password": "sam123"
     }
     
     {
         "email": "samrat@gmail.com",
-        "password": "sam123",
-        "role": "Admin"
+        "password": "sam123"
     }
     
 ```
@@ -79,7 +77,7 @@ http://localhost:1995/swagger-ui/index.html#/
 ### E-R Diagram Of Online Cab Booking Application
 ---
 
-<img src="https://user-images.githubusercontent.com/101389007/233219411-57241aef-7c4a-40d7-8187-311463b7abe4.png">
+<img src="https://user-images.githubusercontent.com/101389007/233461279-5b887298-050a-45f0-adcd-671add82e5ad.png">
 
 
 ---
