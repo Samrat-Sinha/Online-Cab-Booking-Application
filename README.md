@@ -52,7 +52,7 @@ http://localhost:1995/swagger-ui/index.html#/
 
 ### Sample API Response for User Login
 
-`POST   localhost:1995/login`
+`POST   localhost:1995/online_Cab_Booking_Application/login`
 
 * Request Body
 
